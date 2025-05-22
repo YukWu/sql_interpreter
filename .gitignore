@@ -1,0 +1,27 @@
+# Build artifacts
+*.o
+*.a
+*.so
+*.dylib
+
+# Executables
+*.out
+
+# CMake files
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+
+# VS Code
+.vscode/
+
+# Other
+*.swp
+*~
+.DS_Store
+
+# Build directory (common for CMake)
+build/
+bin/
+lib/
