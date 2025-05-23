@@ -12,9 +12,9 @@ add_executable(sql_interpreter_example examples/main.cpp)
 # Define the library for the interpreter core logic
 add_library(sql_interpreter_core
     src/lexer/token.cpp
+    src/lexer/lexer.cpp
     # Add other .cpp files from src/ here as they are created
     # e.g.:
-    # src/lexer/lexer.cpp
     # src/parser/parser.cpp
     # src/ast/ast_node.cpp # If it had a .cpp
     # src/common/error.cpp # If it had a .cpp
@@ -41,9 +41,24 @@ target_include_directories(sql_interpreter_example PUBLIC
 # Link the example executable against the interpreter library
 target_link_libraries(sql_interpreter_example PRIVATE sql_interpreter_core)
 
-# Optional: Add a subdirectory for tests if you use a testing framework like Google Test
-# enable_testing()
-# add_subdirectory(tests) # Assuming tests/CMakeLists.txt exists
+# Catch2 integration
+include(FetchContent)
+FetchContent_Declare(
+  Catch2
+  GIT_REPOSITORY https://github.com/catchorg/Catch2.git
+  GIT_TAG v3.4.0
+)
+FetchContent_MakeAvailable(Catch2)
+
+# Enable testing
+enable_testing()
+
+
+add_executable(lexer_test tests/lexer_test.cpp)
+target_include_directories(lexer_test PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}/src
+)
+target_link_libraries(lexer_test PRIVATE sql_interpreter_core Catch2::Catch2WithMain)
 
 # Install rules (optional)
 # install(TARGETS sql_interpreter_example DESTINATION bin)
