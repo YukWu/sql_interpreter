@@ -41,24 +41,37 @@ target_include_directories(sql_interpreter_example PUBLIC
 # Link the example executable against the interpreter library
 target_link_libraries(sql_interpreter_example PRIVATE sql_interpreter_core)
 
-# Catch2 integration
-include(FetchContent)
-FetchContent_Declare(
-  Catch2
-  GIT_REPOSITORY https://github.com/catchorg/Catch2.git
-  GIT_TAG v3.4.0
-)
-FetchContent_MakeAvailable(Catch2)
+# Testing support (optional, controlled by BUILD_TESTS option)
+option(BUILD_TESTS "Build the tests" OFF)
 
-# Enable testing
-enable_testing()
+if(BUILD_TESTS)
+    message(STATUS "Building tests is enabled")
+    
+    # Catch2 integration
+    include(FetchContent)
+    set(FETCHCONTENT_QUIET OFF)
+    FetchContent_Declare(
+      Catch2
+      GIT_REPOSITORY https://github.com/catchorg/Catch2.git
+      GIT_TAG v3.4.0
+    )
+    FetchContent_MakeAvailable(Catch2)
 
+    # Enable testing
+    enable_testing()
 
-add_executable(lexer_test tests/lexer_test.cpp)
-target_include_directories(lexer_test PUBLIC
-    ${CMAKE_CURRENT_SOURCE_DIR}/src
-)
-target_link_libraries(lexer_test PRIVATE sql_interpreter_core Catch2::Catch2WithMain)
+    # Add test executable
+    add_executable(lexer_test tests/lexer_test.cpp)
+    target_include_directories(lexer_test PUBLIC
+        ${CMAKE_CURRENT_SOURCE_DIR}/src
+    )
+    target_link_libraries(lexer_test PRIVATE sql_interpreter_core Catch2::Catch2WithMain)
+    
+    # Register test with CTest
+    add_test(NAME lexer_unit_tests COMMAND lexer_test)
+else()
+    message(STATUS "Building tests is disabled. Use -DBUILD_TESTS=ON to enable tests.")
+endif()
 
 # Install rules (optional)
 # install(TARGETS sql_interpreter_example DESTINATION bin)
@@ -67,7 +80,18 @@ target_link_libraries(lexer_test PRIVATE sql_interpreter_core Catch2::Catch2With
 
 
 # --- Instructions for building ---
+# Normal build (core library + example only):
 # 1. Create a build directory: mkdir build && cd build
 # 2. Configure CMake: cmake ..
 # 3. Build the project: make (or cmake --build .)
 # 4. Run the example: ./sql_interpreter_example (from the build directory)
+#
+# Build with tests:
+# 1. Create a build directory: mkdir build && cd build
+# 2. Configure CMake with tests: cmake -DBUILD_TESTS=ON ..
+# 3. Build the project: make (or cmake --build .)
+# 4. Run tests: ctest (or make test)
+# 5. Run specific test: ./lexer_test
+#
+# Clean rebuild:
+# rm -rf build && mkdir build && cd build && cmake .. && make
